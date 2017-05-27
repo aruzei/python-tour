@@ -1,5 +1,9 @@
 
 class Mutiple:
+    def __init__(self):
+        self._x = None
+        self._y = None
+        
     def forward(self, x, y):
         self._x = x
         self._y = y
