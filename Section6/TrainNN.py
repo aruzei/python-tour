@@ -5,7 +5,7 @@ import sys, os
 sys.path.append(os.pardir)  # 親ディレクトリのファイルをインポートするための設定
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dataset.mnist import load_mnist
-from Section5.TwoLayerNet import TwoLayerNet
+from MultiLayerNet import MutiLayerNet
 
 def train(x_train,t_train,x_test,t_test,network,optimizer,iters_num):
     train_size = x_train.shape[0]
@@ -33,18 +33,18 @@ def train(x_train,t_train,x_test,t_test,network,optimizer,iters_num):
         loss = network.loss(x_batch, t_batch)
         train_loss_list.append(loss)
         
-        if i % iter_per_epoch == 0:
+        if i % (10) == 0:
             train_acc = network.accuracy(x_train, t_train)
             test_acc = network.accuracy(x_test, t_test)
             train_acc_list.append(train_acc)
             test_acc_list.append(test_acc)
             print(train_acc, test_acc)
 
-    return train_loss_list
+    return train_loss_list,train_acc_list,test_acc_list
 def Prepare_training(x_train,t_train,x_test,t_test):
     
-    def train_NN(optimizer,iters_num):
-        network = TwoLayerNet(input_size=x_train.shape[1], hidden_size=50, output_size=t_train.shape[1])
+    def train_NN(optimizer,hidden_size_list,iters_num,weight_init_std):
+        network = MutiLayerNet(input_size=x_train.shape[1], hidden_size_list= hidden_size_list, output_size=t_train.shape[1],weight_init_std=weight_init_std)
         return train(x_train,t_train,x_test,t_test,network,optimizer,iters_num)
     return train_NN
 
@@ -64,17 +64,22 @@ optimizer2 = Momentum(0.01,0.9)
 optimizer3 = AdaGrad(0.01)
 optimizer4 = Adam(0.01)
 
+train_loss_list1,train_acc_list1,test_acc_list1 = training(optimizer1,[50,50,50],200,0.01)
+train_loss_list2,train_acc_list2,test_acc_list2 = training(optimizer2,[50,50,50],200,0.01)
+train_loss_list3,train_acc_list3,test_acc_list3 = training(optimizer4,[50,50,50],200,0.01)
 
-train_loss_list1 = training(optimizer1,2000)
-train_loss_list2 = training(optimizer2,2000)
-train_loss_list3 = training(optimizer3,2000)
-train_loss_list4 = training(optimizer4,2000)
+ones = np.ones(5)/5.0
 
+plt.subplot(1,2,1)
+plt.plot(np.convolve(train_loss_list1,ones,'valid'),label="SGD")
+plt.plot(np.convolve(train_loss_list2,ones,'valid'),label="Momentum")
+plt.plot(np.convolve(train_loss_list3,ones,'valid'),label="Adam")
 
-plt.plot(train_loss_list1[::1],label="SGD")
-plt.plot(train_loss_list2[::1],label="Momentum")
-plt.plot(train_loss_list3[::1],label="AdaGrad")
-plt.plot(train_loss_list4[::1],label="Adam")
+plt.subplot(1,2,2)
+
+plt.plot(train_acc_list1,label="SGD")
+plt.plot(train_acc_list2,label="Momentum")
+plt.plot(train_acc_list3,label="Adam")
 
 plt.legend()
 plt.show()
